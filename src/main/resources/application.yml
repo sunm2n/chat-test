@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: realtime-chat-app
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/chatdb
+    username: postgres
+    password: password
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
+    mongodb:
+      uri: mongodb://localhost:27017/chatdb
+
+jwt:
+  secret:
+    key: mySecretKey123456789012345678901234567890
+  expiration: 86400
+
+logging:
+  level:
+    com.example.chatapp: DEBUG
+    org.springframework.web.socket: DEBUG
+    org.springframework.messaging: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+server:
+  port: 8082
