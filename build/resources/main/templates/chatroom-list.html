@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>채팅방 목록</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            padding: 30px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .create-room-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .create-room-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .create-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            align-self: flex-start;
+        }
+
+        .create-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .room-list {
+            display: grid;
+            gap: 20px;
+        }
+
+        .room-card {
+            background: white;
+            border: 2px solid #e1e5e9;
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .room-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.1);
+        }
+
+        .room-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .room-name {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .room-description {
+            color: #666;
+            margin-bottom: 15px;
+            font-size: 0.95em;
+        }
+
+        .room-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9em;
+            color: #888;
+        }
+
+        .participant-count {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+
+        .no-rooms {
+            text-align: center;
+            color: #666;
+            font-size: 1.2em;
+            padding: 40px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .create-room-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💬 채팅방 목록</h1>
+            <p>원하는 채팅방을 선택하거나 새로운 채팅방을 만들어보세요</p>
+        </div>
+
+        <div class="create-room-section">
+            <h2 style="margin-bottom: 20px; color: #333;">새 채팅방 만들기</h2>
+            <form class="create-room-form" id="createRoomForm">
+                <div class="form-group">
+                    <label for="roomName">채팅방 이름</label>
+                    <input type="text" id="roomName" name="roomName" required placeholder="채팅방 이름을 입력하세요">
+                </div>
+                <div class="form-group">
+                    <label for="description">설명 (선택사항)</label>
+                    <textarea id="description" name="description" placeholder="채팅방에 대한 간단한 설명을 입력하세요"></textarea>
+                </div>
+                <button type="submit" class="create-btn">채팅방 생성</button>
+            </form>
+        </div>
+
+        <div id="roomList" class="room-list">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>채팅방 목록을 불러오는 중...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chatRooms = [];
+
+        async function loadChatRooms() {
+            try {
+                const response = await fetch('/api/chatrooms');
+                if (response.ok) {
+                    chatRooms = await response.json();
+                    renderChatRooms();
+                } else {
+                    throw new Error('채팅방 목록을 불러오는데 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('Error loading chat rooms:', error);
+                document.getElementById('roomList').innerHTML = `
+                    <div class="no-rooms">
+                        <p>채팅방 목록을 불러오는데 실패했습니다.</p>
+                        <button onclick="loadChatRooms()" style="margin-top: 10px; padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">다시 시도</button>
+                    </div>
+                `;
+            }
+        }
+
+        function renderChatRooms() {
+            const roomList = document.getElementById('roomList');
+            
+            if (chatRooms.length === 0) {
+                roomList.innerHTML = `
+                    <div class="no-rooms">
+                        <p>아직 생성된 채팅방이 없습니다.</p>
+                        <p>위에서 새로운 채팅방을 만들어보세요! 🚀</p>
+                    </div>
+                `;
+                return;
+            }
+
+            roomList.innerHTML = chatRooms.map(room => `
+                <div class="room-card" onclick="joinRoom('${room.roomId}')">
+                    <div class="room-header">
+                        <div class="room-name">${escapeHtml(room.roomName)}</div>
+                        <button class="delete-btn" onclick="event.stopPropagation(); deleteRoom('${room.roomId}')" title="채팅방 삭제">
+                            🗑️ 삭제
+                        </button>
+                    </div>
+                    ${room.description ? `<div class="room-description">${escapeHtml(room.description)}</div>` : ''}
+                    <div class="room-info">
+                        <span>생성자: ${escapeHtml(room.createdBy)}</span>
+                        <span class="participant-count">👥 ${room.participantCount}명</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        async function createRoom(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            const roomData = {
+                roomName: formData.get('roomName').trim(),
+                description: formData.get('description').trim()
+            };
+
+            if (!roomData.roomName) {
+                alert('채팅방 이름을 입력해주세요.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/chatrooms?createdBy=anonymous', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(roomData)
+                });
+
+                if (response.ok) {
+                    const newRoom = await response.json();
+                    alert('채팅방이 성공적으로 생성되었습니다!');
+                    event.target.reset();
+                    await loadChatRooms();
+                } else {
+                    throw new Error('채팅방 생성에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('Error creating room:', error);
+                alert('채팅방 생성 중 오류가 발생했습니다.');
+            }
+        }
+
+        async function deleteRoom(roomId) {
+            if (!confirm('정말로 이 채팅방을 삭제하시겠습니까?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/chatrooms/${roomId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('채팅방이 삭제되었습니다.');
+                    await loadChatRooms();
+                } else {
+                    throw new Error('채팅방 삭제에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('Error deleting room:', error);
+                alert('채팅방 삭제 중 오류가 발생했습니다.');
+            }
+        }
+
+        function joinRoom(roomId) {
+            window.location.href = `/chat/${roomId}`;
+        }
+
+        document.getElementById('createRoomForm').addEventListener('submit', createRoom);
+
+        loadChatRooms();
+    </script>
+</body>
+</html>
