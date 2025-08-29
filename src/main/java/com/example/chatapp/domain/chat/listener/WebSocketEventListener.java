@@ -26,6 +26,8 @@ public class WebSocketEventListener {
         if (userId != null && roomId != null) {
             log.info("WebSocket connection established - User: {}, Room: {}, Session: {}", 
                     userId, roomId, headerAccessor.getSessionId());
+            
+            chatService.handleUserJoin(roomId, userId);
         }
     }
 

@@ -147,6 +147,7 @@ public class ChatService {
             // 채팅방 참여자 수 증가
             try {
                 chatRoomService.incrementParticipantCount(roomId);
+                broadcastRoomListUpdate();
             } catch (Exception e) {
                 log.warn("Failed to increment participant count for room {}: {}", roomId, e.getMessage());
             }
@@ -179,6 +180,7 @@ public class ChatService {
             // 채팅방 참여자 수 감소
             try {
                 chatRoomService.decrementParticipantCount(roomId);
+                broadcastRoomListUpdate();
             } catch (Exception e) {
                 log.warn("Failed to decrement participant count for room {}: {}", roomId, e.getMessage());
             }
@@ -227,6 +229,15 @@ public class ChatService {
         } catch (Exception e) {
             log.error("Error getting chat history: {}", e.getMessage());
             return List.of();
+        }
+    }
+
+    private void broadcastRoomListUpdate() {
+        try {
+            messagingTemplate.convertAndSend("/sub/roomlist/update", "ROOM_LIST_UPDATED");
+            log.debug("Room list update broadcasted");
+        } catch (Exception e) {
+            log.error("Error broadcasting room list update: {}", e.getMessage());
         }
     }
 }

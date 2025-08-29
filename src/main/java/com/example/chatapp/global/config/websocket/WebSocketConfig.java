@@ -24,8 +24,17 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
+        // 채팅용 WebSocket (JWT 인증 필요)
         registry.addEndpoint("/ws-chat")
                 .addInterceptors(simpleHandshakeInterceptor)
+                .setAllowedOriginPatterns("*")
+                .withSockJS()
+                .setHeartbeatTime(30000)
+                .setDisconnectDelay(5000)
+                .setClientLibraryUrl("https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js");
+        
+        // 채팅방 목록 업데이트용 WebSocket (인증 없음)
+        registry.addEndpoint("/ws-roomlist")
                 .setAllowedOriginPatterns("*")
                 .withSockJS()
                 .setHeartbeatTime(30000)
